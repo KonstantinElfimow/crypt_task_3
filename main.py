@@ -24,7 +24,7 @@ def gen_all_combo_and_compare_hashes(elements: list, current: list, next: int, u
                     return
 
 
-def broot_force(elements: list, h: np.uint64, iv: np.uint64) -> None:
+def boot_force(elements: list, h: np.uint64, iv: np.uint64) -> None:
     used = list()
     for i in range(len(elements)):
         used.append(False)
@@ -40,7 +40,7 @@ def task_hash() -> None:
     my_utils.save_in_file('./crypto_hash/output/output_collision.txt', h)
 
     data = list('abcdefghijklmn')
-    broot_force(data, h, iv)
+    boot_force(data, h, iv)
 
 
 def main():
