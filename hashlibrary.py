@@ -1,7 +1,40 @@
 import numpy as np
 from my_utils import cyclic_shift, xor_lists, cut_bits_of_number, collect_int_number, cut_uint64_num_into_list_uint16
 
-_ROUNDS: int = 1  # количество проходов по сети Фейстеля
+_ROUNDS: int = 10  # количество проходов по сети Фейстеля
+
+
+def parse_message_by_blocks(message: bytes) -> list:
+    result: list = list()
+    count = 0
+    while count < len(message):
+        m: list = list()
+        for _ in range(4):
+            m.append(np.uint16(int.from_bytes(message[count:(count + 1)], byteorder="little", signed=False)))
+            count += 2
+        result.append(m)
+    return result
+
+
+def read_file_message_by_blocks(path_from: str) -> list:
+    try:
+        with open(path_from, 'rb') as rfile:
+            message: list = list()
+            while True:
+                # Проверка конца файла
+                file_eof: bytes = rfile.read(1)
+                rfile.seek(rfile.tell() - 1)
+                if file_eof == b'':
+                    break
+
+                # Блок состоит из 4 частей
+                m: list = list()
+                for _ in range(4):
+                    m.append(np.uint16(int.from_bytes(rfile.read(2), byteorder="little", signed=False)))
+                message.append(m)
+            return message
+    except FileNotFoundError:
+        print("Невозможно открыть файл")
 
 
 def _f1(m0: np.uint16, m1: np.uint16) -> np.uint16:
@@ -9,7 +42,7 @@ def _f1(m0: np.uint16, m1: np.uint16) -> np.uint16:
     return (cyclic_shift(m0, 16, 4)) + (cyclic_shift(m1, 16, -2))
 
 
-def _f2(m2: np.uint16, m3: np.uint16.numerator) -> np.uint16:
+def _f2(m2: np.uint16, m3: np.uint16) -> np.uint16:
     """ (m2 <<< 7) ^ ~m3 """
     return cyclic_shift(m2, 16, 7) ^ (~m3)
 
@@ -34,31 +67,26 @@ def _create_round_keys(iv: np.uint64):
     return round_keys
 
 
-def hash(path_from: str, iv: np.uint64) -> np.uint64:
-    try:
-        # Открываем файл, сообщение которого нужно захешировать
-        with open(path_from, 'rb') as rfile:
-            # h0, h1, ..., hi
-            h: list = cut_uint64_num_into_list_uint16(iv)
-            while True:
-                # Проверка конца файла
-                file_eof: bytes = rfile.read(1)
-                rfile.seek(rfile.tell() - 1)
-                if file_eof == b'':
-                    break
+def hash(IV: np.uint64, message: bytes = None, path_from: str = None) -> np.uint64:
+    if (message is path_from) and (path_from is None or path_from is not None):
+        print("Передайте сообщение или путь к файлу, где хранится сообщение!")
+        return np.uint64(0)
 
-                # Блок состоит из 4 частей
-                message: list = list()
-                for _ in range(4):
-                    message.append(np.uint16(int.from_bytes(rfile.read(2), byteorder="little", signed=False)))
+    if message:
+        message: list = parse_message_by_blocks(message)
 
-                # Создаём раундовые ключи
-                round_keys: list = _create_round_keys(np.uint64(collect_int_number(h)))
+    elif path_from:
+        message: list = read_file_message_by_blocks(path_from)
 
-                #  Хеширование
-                h = xor_lists(xor_lists(_Ek(xor_lists(message, h), round_keys), h), message)
+    # h0, h1, ..., hi
+    h: list = cut_uint64_num_into_list_uint16(IV)
+    for m in message:
+        # Создаём раундовые ключи
+        secret_round_key = np.uint64(collect_int_number(h))
+        round_keys: list = _create_round_keys(secret_round_key)
 
-            result = np.uint64(collect_int_number(h))
-            return result
-    except FileNotFoundError:
-        print("Невозможно открыть файл")
+        #  Хеширование
+        h = xor_lists(xor_lists(_Ek(xor_lists(m, h), round_keys), h), m)
+
+    result = np.uint64(collect_int_number(h))
+    return result
