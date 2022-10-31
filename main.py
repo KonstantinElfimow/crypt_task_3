@@ -8,9 +8,9 @@ import time
 def compare_hashes(current: list, h: np.uint64, iv: np.uint64) -> bool:
     my_utils.save_list_in_file('./crypto_hash/input/input.txt', current)
     comparable: np.uint64 = hash('./crypto_hash/input/input.txt', iv)
+    my_utils.save_in_file('./crypto_hash/output/output.txt', comparable)
 
     if h == comparable:
-        my_utils.save_in_file('./crypto_hash/output/output.txt', comparable)
         print("h: ", h, "comparable:", comparable)
         return True
     return False

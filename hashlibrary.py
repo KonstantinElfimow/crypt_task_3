@@ -1,7 +1,7 @@
 import numpy as np
 from my_utils import cyclic_shift, xor_lists, cut_bits_of_number, collect_int_number, cut_uint64_num_into_list_uint16
 
-_ROUNDS: int = 10  # количество проходов по сети Фейстеля
+_ROUNDS: int = 1  # количество проходов по сети Фейстеля
 
 
 def _f1(m0: np.uint16, m1: np.uint16) -> np.uint16:
