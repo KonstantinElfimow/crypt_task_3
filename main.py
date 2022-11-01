@@ -4,8 +4,8 @@ from hashlibrary import hash
 import my_utils
 import time
 
-#IV: np.uint64 = np.uint64(random.randint(1, 18446744073709551616))
-IV: np.uint64 = np.uint64(2157798615745820775)
+IV: np.uint64 = np.uint64(random.randint(1, 18446744073709551616))
+#IV: np.uint64 = np.uint64(5128838431977526119)
 
 
 def compare_hashes(current: list, for_collision: np.uint64) -> bool:
@@ -19,20 +19,21 @@ def compare_hashes(current: list, for_collision: np.uint64) -> bool:
     return False
 
 
-def gen_all_combo_and_compare_hashes(elements: list, current: list, next: int, used: list, for_collision: np.uint64) -> None:
+def gen_all_combo_and_compare_hashes(elements: list, current: list, next: int, used: list,
+                                     for_collision: np.uint64, is_equal: bool) -> bool:
     """ Рекурсивно создаются различные размещения в последовательности символов (сложность: O(n!)),
-    затем получаем их хеш и сравниваем с требуемым хешем."""
+    затем получаем хеш последовательностей и сравниваем с требуемым хешем. Возвращаем bool значение равенства хешей.
+    Нужный хеш записывается в output.txt, а входное сообщение в input.txt. """
     for i in range(len(elements)):
         if not used[i]:
             used[i] = True
             current[next] = elements[i]
-            gen_all_combo_and_compare_hashes(elements, current, next + 1, used, for_collision)
+            gen_all_combo_and_compare_hashes(elements, current, next + 1, used, for_collision, is_equal)
             used[i] = False
 
             if next == len(elements) - 1:
-                is_equal = compare_hashes(current, for_collision)
-                if is_equal:
-                    return
+                is_equal = is_equal if True else compare_hashes(current, for_collision)
+    return is_equal
 
 
 def factorial(n) -> int:
@@ -48,8 +49,11 @@ def boot_force(input: list, for_collision: np.uint64) -> None:
         used.append(False)
 
     start = time.perf_counter()
-    gen_all_combo_and_compare_hashes(input, np.copy(input), 0, used, for_collision)
+    value = gen_all_combo_and_compare_hashes(input, np.copy(input), 0, used,
+                                             for_collision, False)
     per_sec = (time.perf_counter() - start) / factorial(len(input))
+
+    print("Требуемый хеш найден? ", value)
 
     print("Общее среднее время (в днях), требуемое для рассчёта все возможных случаев хеша (2 ^ 64): ",
           (2 ** 64) * per_sec / 3600 / 24)
