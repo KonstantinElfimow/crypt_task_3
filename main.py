@@ -43,7 +43,7 @@ def factorial(n) -> int:
     return f
 
 
-def boot_force(input: list, for_collision: np.uint64) -> None:
+def brute_force(input: list, for_collision: np.uint64) -> None:
     used = list()
     for i in range(len(input)):
         used.append(False)
@@ -100,7 +100,7 @@ def task_hash() -> None:
     my_utils.save_in_file('./crypto_hash/output/output_collision.txt', h)
 
     data = list("abcdefg")
-    boot_force(data, h)
+    brute_force(data, h)
 
 
 def main():
