@@ -5,7 +5,7 @@ import my_utils
 import time
 
 IV: np.uint64 = np.uint64(random.randint(1, 18446744073709551616))
-#IV: np.uint64 = np.uint64(5128838431977526119)
+# IV: np.uint64 = np.uint64(5128838431977526119)
 
 
 def compare_hashes(current: list, for_collision: np.uint64) -> bool:
@@ -62,11 +62,21 @@ def boot_force(input: list, for_collision: np.uint64) -> None:
 def determine_the_avalanche_effect_of_hash():
     """ Зависимость всех выходных битов от каждого входного бита. Отличие выходных битов для хорошего криптографического
     алгоритма хеширования должно составлять в среднем 50% при разнице в один бит. """
+
+    # my_utils.save_in_file('./crypto_hash/input/input_1.txt', bytes("aaaaaaaaaaaaaaaa", "UTF-8"))
+    # my_utils.save_in_file('./crypto_hash/input/input_2.txt', bytes("baaaaaaaaaaaaaaa", "UTF-8"))
+    #
+    # h1 = hash(IV, path_from='./crypto_hash/input/input_1.txt')
+    # h2 = hash(IV, path_from='./crypto_hash/input/input_2.txt')
+
     m1: bytes = bytes("aaaaaaaaaaaaaaaa", "UTF-8")
     m2: bytes = bytes("baaaaaaaaaaaaaaa", "UTF-8")
 
     h1 = hash(IV, m1)
     h2 = hash(IV, m2)
+
+    my_utils.save_in_file('crypto_hash/output/output_1.txt', h1)
+    my_utils.save_in_file('crypto_hash/output/output_2.txt', h2)
 
     width: int = 64
     h1 = my_utils.to_bits(h1, width)

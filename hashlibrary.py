@@ -10,7 +10,7 @@ def parse_message_by_blocks(message: bytes) -> list:
     while count < len(message):
         m: list = list()
         for _ in range(4):
-            m.append(np.uint16(int.from_bytes(message[count:(count + 1)], byteorder="little", signed=False)))
+            m.append(np.uint16(int.from_bytes(message[count:(count + 2)], byteorder="little", signed=False)))
             count += 2
         result.append(m)
     return result
@@ -81,6 +81,7 @@ def hash(IV: np.uint64, message: bytes = None, path_from: str = None) -> np.uint
     # h0, h1, ..., hi
     h: list = cut_uint64_num_into_list_uint16(IV)
     for m in message:
+
         # Создаём раундовые ключи
         secret_round_key = np.uint64(collect_int_number(h))
         round_keys: list = _create_round_keys(secret_round_key)
