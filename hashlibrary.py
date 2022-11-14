@@ -5,6 +5,7 @@ _ROUNDS: int = 10  # количество проходов по сети Фей�
 
 
 def parse_message_by_blocks(message: bytes) -> list:
+    """ Читаем сообщение по 8 байт, разбивая их на блоки по два байта """
     result: list = list()
     count = 0
     while count < len(message):
@@ -17,6 +18,7 @@ def parse_message_by_blocks(message: bytes) -> list:
 
 
 def read_file_message_by_blocks(path_from: str) -> list:
+    """ Читаем сообщение по 8 байт, разбивая их на блоки по два байта """
     try:
         with open(path_from, 'rb') as rfile:
             message: list = list()
@@ -48,7 +50,7 @@ def _f2(m2: np.uint16, m3: np.uint16) -> np.uint16:
 
 
 def _Ek(message: list, round_keys: list) -> list:
-    #  ...выполняем преобразование по раундам (сжимающая функция)
+    #  ...выполняем преобразование по раундам (сжимающая функция) в соответствии с сетью Фейстеля из 1 задания
     cipher: list = np.copy(message)
     for i in range(_ROUNDS):
         cipher[0] = message[2] ^ (~round_keys[i])
@@ -60,7 +62,7 @@ def _Ek(message: list, round_keys: list) -> list:
 
 
 def _create_round_keys(iv: np.uint64):
-    round_keys: list = list()  # Создаём раундовые ключи
+    round_keys: list = list()  # Создаём раундовые ключи по сети Фейстеля из 1 задания
     for index in range(_ROUNDS):
         temp = cyclic_shift(iv, 64, -(index + 1)) ^ iv
         round_keys.append(np.uint16(cut_bits_of_number(temp, 64, 16)))
@@ -69,8 +71,7 @@ def _create_round_keys(iv: np.uint64):
 
 def hash(IV: np.uint64, message: bytes = None, path_from: str = None) -> np.uint64:
     if (message is path_from) and (path_from is None or path_from is not None):
-        print("Передайте сообщение или путь к файлу, где хранится сообщение!")
-        return np.uint64(0)
+        raise ValueError('Передайте message или path_from!')
 
     if message:
         message: list = parse_message_by_blocks(message)
@@ -78,7 +79,7 @@ def hash(IV: np.uint64, message: bytes = None, path_from: str = None) -> np.uint
     elif path_from:
         message: list = read_file_message_by_blocks(path_from)
 
-    # h0, h1, ..., hi
+    # h0, h1, ..., hi - промежуточные хеши; h0 равен вектору инициализации
     h: list = cut_uint64_num_into_list_uint16(IV)
     for m in message:
 
@@ -86,8 +87,9 @@ def hash(IV: np.uint64, message: bytes = None, path_from: str = None) -> np.uint
         secret_round_key = np.uint64(collect_int_number(h))
         round_keys: list = _create_round_keys(secret_round_key)
 
-        #  Хеширование
+        #  Хеширование в соответствии с вариантом ЗАДАНИЯ!
         h = xor_lists(xor_lists(_Ek(xor_lists(m, h), round_keys), h), m)
 
+    # Итоговый кеш
     result = np.uint64(collect_int_number(h))
     return result
