@@ -13,7 +13,7 @@ def add_to_file(path_to: str, data: list) -> bool:
         return False
 
 
-def save_in_file(path_to: str, data) -> bool:
+def save_in_file(path_to: str, data: bytes) -> bool:
     try:
         with open(path_to, 'wb') as f:
             f.write(data)
@@ -50,7 +50,7 @@ def entropy(labels: bytearray) -> float:
     return - np.sum(probs * np.log(probs)) / np.log(n_classes)
 
 
-def xor_lists(l1: list, l2: list):
+def xor_lists(l1: list, l2: list) -> list | None:
     if len(l1) != len(l2):
         return None
     temp: list = list()
@@ -69,7 +69,7 @@ def collect_int_number(l_of_np_numbers: list) -> int:
     return result
 
 
-def cut_uint64_num_into_list_uint16(value: int) -> list:
+def cut_uint64_num_into_list_uint16(value: np.uint64) -> list:
     """ По сути эта функция для разбиения uint64 на равное количество бит для функции xor_lists (очередной костыль) """
     result: list = list()
     binary: str = to_bits(value, 64)
@@ -78,7 +78,7 @@ def cut_uint64_num_into_list_uint16(value: int) -> list:
     return result
 
 
-def cyclic_shift(value: int, width: int, shift: int):
+def cyclic_shift(value, width: int, shift: int):
     """ Побитовый циклический сдвиг числа.
         value < 0 - циклический сдвиг вправо.
         value > 0 - циклический сдвиг влево"""
@@ -92,7 +92,7 @@ def cyclic_shift(value: int, width: int, shift: int):
     return result
 
 
-def cut_bits_of_number(value: int, width_old_big: int, width_new_less: int) -> int:
+def cut_bits_of_number(value, width_old_big: int, width_new_less: int) -> int:
     """ Функция создана с целью преобразования из длинных
         беззнаковых целых чисел в более короткие беззнаковые
         целые числа """
@@ -106,6 +106,6 @@ def cut_bits_of_number(value: int, width_old_big: int, width_new_less: int) -> i
     return result
 
 
-def to_bits(value: int, width: int) -> str:
+def to_bits(value, width: int) -> str:
     """ Преобразование числа в его битовое представление, начиная со старшего разряда """
     return '{:0{width}b}'.format(value, width=width)[::1]

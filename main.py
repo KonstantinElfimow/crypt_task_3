@@ -11,10 +11,10 @@ IV: np.uint64 = np.uint64(random.randint(1, 18446744073709551616))
 def compare_hashes(current: list, for_collision: np.uint64) -> bool:
     my_utils.save_list_in_file('./crypto_hash/input/input.txt', current)
     comparable: np.uint64 = hash(IV, path_from='./crypto_hash/input/input.txt')
-    my_utils.save_in_file('./crypto_hash/output/output.txt', comparable)
 
     if for_collision == comparable:
         print("h: ", for_collision, "comparable:", comparable)
+        my_utils.save_in_file('./crypto_hash/output/output.txt', comparable)
         return True
     return False
 
@@ -100,7 +100,7 @@ def task_hash() -> None:
 
     # Создаём различные комбинации букв латинского алфавита, чтобы получить (навряд ли) коллизию ф-ии хеширования,
     # когда h1 == h2 и m1 != m2.
-    data = list("abcdef")
+    data = list("abcdefg")
     brute_force(data, h)
 
 
